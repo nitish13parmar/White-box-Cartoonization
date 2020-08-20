@@ -3,7 +3,6 @@ import io
 import uuid
 import shutil
 import sys
-import traceback
 
 import threading
 import time
@@ -124,48 +123,42 @@ threading.Thread(target=handle_requests_by_batch).start()
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    try:
-        print(requests_queue.qsize())
+    print(requests_queue.qsize())
 
-        if requests_queue.qsize() >= 1:
-            return jsonify({'message': 'Too Many Requests'}), 429
+    if requests_queue.qsize() >= 1:
+        return jsonify({'message': 'Too Many Requests'}), 429
 
-        input_file = request.files['source']
-        file_type = request.form['file_type']
+    input_file = request.files['source']
+    file_type = request.form['file_type']
 
-        if file_type == 'image':
-            if input_file.content_type not in ['image/jpeg', 'image/jpg', 'image/png']:
-                return jsonify({'message': 'Only support jpeg, jpg or png'}), 400
+    if file_type == 'image':
+        if input_file.content_type not in ['image/jpeg', 'image/jpg', 'image/png']:
+            return jsonify({'message': 'Only support jpeg, jpg or png'}), 400
 
-        else :
-            if input_file.content_type not in ['video/mp4']:
-                return jsonify({'message': 'Only support mp4'}), 400
+    else :
+        if input_file.content_type not in ['video/mp4']:
+            return jsonify({'message': 'Only support mp4'}), 400
 
-        f_id = str(uuid.uuid4())
-        f_path = os.path.join(DATA_FOLDER, f_id)
-        os.makedirs(f_path, exist_ok=True)
+    f_id = str(uuid.uuid4())
+    f_path = os.path.join(DATA_FOLDER, f_id)
+    os.makedirs(f_path, exist_ok=True)
 
-        req = {
-            'input': [input_file, file_type, f_path]
-        }
+    req = {
+        'input': [input_file, file_type, f_path]
+    }
 
-        requests_queue.put(req)
+    requests_queue.put(req)
 
-        while 'output' not in req:
-            time.sleep(CHECK_INTERVAL)
+    while 'output' not in req:
+        time.sleep(CHECK_INTERVAL)
 
-        result_path = req['output']
+    result_path = req['output']
 
-        result = send_file(result_path)
+    result = send_file(result_path)
 
-        shutil.rmtree(f_path)
+    shutil.rmtree(f_path)
 
-        return result
-
-    except Exception as e:
-        print(traceback.print_exc())
-        flash("Our server hiccuped :/ Please upload another file! :)")
-        return render_template("index.html")
+    return result
 
 @app.route('/health')
 def health():

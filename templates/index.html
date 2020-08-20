@@ -16,9 +16,9 @@
 
                 <h1>Cartoonize</h1>
                 <h3>This convert images and videos into a cartoon style. Try it!</h3>
-                <A>Git Hub repository : </A> <A href="https://github.com/psi1104/White-box-Cartoonization"> Cartoonize repo</A>
+                <A>Git Hub repository : </A> <A href="https://github.com/psi1104/White-box-Cartoonization" target="blank"> Cartoonize repo</A>
                 <br>
-                <A>Open API : </A> <A href="https://ainize.ai/psi1104/White-box-Cartoonization?branch=master"> on Ainize </A>
+                <A>Open API : </A> <A href="https://ainize.ai/psi1104/White-box-Cartoonization?branch=master" target="blank"> on Ainize </A>
 
                 <hr class="solid">
 
@@ -36,6 +36,12 @@
                     <label><input type="radio" name="file_type" value="image" /> Image </label>
                     <label><input type="radio" name="file_type" value="video" /> Video </label>
                     <p>* Please upload a file that is less than 35MB.</p>
+                </div>
+                <div id="sampleBox" style="margin-bottom: 5px;">
+                    <p style="display:inline">Sample : </p>
+                    <a href="https://raw.githubusercontent.com/psi1104/White-box-Cartoonization/master/static/sample_files/sample_image1.jpg" target="blank">Sample Image</a>
+                    &nbsp;&nbsp;&nbsp;
+                    <a href="https://raw.githubusercontent.com/psi1104/White-box-Cartoonization/master/static/sample_files/sample_video1.mp4" target="blank">Sample Video</a>
                 </div>
                 <div id = 'inputFile'>
                     <label for="source"> Upload file : </label>
@@ -82,6 +88,9 @@
                             }
                             else if (document.getElementById('source').files[0] == undefined){
                                 throw Error("Please upload file");
+                            }
+                            else if(document.getElementById('source').files[0].size / (1000 *1000) > 35){
+                                throw Error("Please upload a file smaller than 35MB.");
                             }
                         }catch (e) {
                             document.getElementById("errorbox").innerHTML = e;
