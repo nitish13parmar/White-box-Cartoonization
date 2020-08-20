@@ -10,7 +10,7 @@ import time
 from queue import Empty, Queue
 
 import cv2
-from flask import Flask, render_template, make_response, flash, send_file, request, jsonify
+from flask import Flask, render_template, flash, send_file, request, jsonify, url_for
 from PIL import Image
 import numpy as np
 
@@ -19,7 +19,8 @@ sys.path.insert(0, './test_code/')
 from cartoonize import WB_Cartoonize
 
 ###################################################################
-app = Flask(__name__, template_folder='templates')
+app = Flask(__name__, template_folder='templates', static_url_path='/static')
+app.config['MAX_CONTENT_LENGTH'] = 35 * 1024 * 1024
 
 DATA_FOLDER = 'data'
 
