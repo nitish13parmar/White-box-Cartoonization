@@ -1,4 +1,5 @@
-<img src='paper/shinjuku.jpg' align="left" width=1000>
+<img src="https://raw.githubusercontent.com/psi1104/White-box-Cartoonization/master/paper/shinjuku.jpg" align="left" width= 100%;>
+
 
 <br><br><br>
 
@@ -12,24 +13,24 @@
 - Improved method for facial images are now available:
 - https://github.com/SystemErrorWang/FacialCartoonization
 
-<img src="images/method.jpg" width="1000px"/>
-<img src="images/use_cases.jpg" width="1000px"/>
+<img src="https://raw.githubusercontent.com/psi1104/White-box-Cartoonization/master/images/method.jpg" width= 100%;/>
+<img src="https://raw.githubusercontent.com/psi1104/White-box-Cartoonization/master/images/use_cases.jpg" width= 100%;/>
 
 ## Use cases
 
 ### Scenery
-<img src="images/city1.jpg" width="1000px"/>
-<img src="images/city2.jpg" width="1000px"/>
+<img src="https://raw.githubusercontent.com/psi1104/White-box-Cartoonization/master/images/city1.jpg" width= 100%;/>
+<img src="https://raw.githubusercontent.com/psi1104/White-box-Cartoonization/master/images/city2.jpg" width= 100%;/>
 
 ### Food
-<img src="images/food.jpg" width="1000px"/>
+<img src="https://raw.githubusercontent.com/psi1104/White-box-Cartoonization/master/images/food.jpg" width= 100%;/>
 
 ### Indoor Scenes
-<img src="images/home.jpg" width="1000px"/>
+<img src="https://raw.githubusercontent.com/psi1104/White-box-Cartoonization/master/images/home.jpg" width= 100%;/>
 
 ### People
-<img src="images/person1.jpg" width="1000px"/>
-<img src="images/person2.jpg" width="1000px"/>
+<img src="https://raw.githubusercontent.com/psi1104/White-box-Cartoonization/master/images/person1.jpg" width= 100%;/>
+<img src="https://raw.githubusercontent.com/psi1104/White-box-Cartoonization/master/images/person2.jpg" width= 100%;/>
 
 ### More Images Are Shown In The Supplementary Materials
 
