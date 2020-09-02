@@ -52,45 +52,49 @@ def convert_bytes_to_image(img_bytes):
     return image
 
 def run(input_file, file_type, f_path):
+    try:
+        if file_type == 'image':
+            f_name = str(uuid.uuid4())
 
-    if file_type == 'image':
-        f_name = str(uuid.uuid4())
+            img = input_file.read()
 
-        img = input_file.read()
+            ## Read Image and convert to PIL (RGB) if RGBA convert appropriately
+            image = convert_bytes_to_image(img)
 
-        ## Read Image and convert to PIL (RGB) if RGBA convert appropriately
-        image = convert_bytes_to_image(img)
+            cartoon_image = wb_cartoonizer.infer(image)
 
-        cartoon_image = wb_cartoonizer.infer(image)
+            cartoonized_img_name = os.path.join(f_path, f_name + ".jpg")
+            cv2.imwrite(cartoonized_img_name, cv2.cvtColor(cartoon_image, cv2.COLOR_RGB2BGR))
 
-        cartoonized_img_name = os.path.join(f_path, f_name + ".jpg")
-        cv2.imwrite(cartoonized_img_name, cv2.cvtColor(cartoon_image, cv2.COLOR_RGB2BGR))
+            result_path = cartoonized_img_name
 
-        result_path = cartoonized_img_name
+            return result_path
 
-        return result_path
+        if file_type == 'video':
+            f_name = input_file.filename
 
-    if file_type == 'video':
-        f_name = input_file.filename
+            video = input_file
 
-        video = input_file
+            original_video_path = os.path.join(f_path, f_name)
+            video.save(original_video_path)
 
-        original_video_path = os.path.join(f_path, f_name)
-        video.save(original_video_path)
+            # Slice, Resize and Convert Video to 15fps
+            modified_video_path = os.path.join(f_path, f_name.split(".")[0] + "_modified.mp4")
+            width_resize = 480
+            os.system(
+                "ffmpeg -hide_banner -loglevel warning -ss 0 -i '{}' -t 10 -filter:v scale={}:-2 -r 15 -c:a copy '{}'".format(
+                    os.path.abspath(original_video_path), width_resize, os.path.abspath(modified_video_path)))
 
-        # Slice, Resize and Convert Video to 15fps
-        modified_video_path = os.path.join(f_path, f_name.split(".")[0] + "_modified.mp4")
-        width_resize = 480
-        os.system(
-            "ffmpeg -hide_banner -loglevel warning -ss 0 -i '{}' -t 10 -filter:v scale={}:-2 -r 15 -c:a copy '{}'".format(
-                os.path.abspath(original_video_path), width_resize, os.path.abspath(modified_video_path)))
+            # if local then "output_uri" is a file path
+            output_uri = wb_cartoonizer.process_video(modified_video_path)
 
-        # if local then "output_uri" is a file path
-        output_uri = wb_cartoonizer.process_video(modified_video_path)
+            result_path = output_uri
 
-        result_path = output_uri
+            return result_path
 
-        return result_path
+    except Exception as e:
+        print(e)
+        return 500
 
 def handle_requests_by_batch():
     try:
@@ -123,42 +127,51 @@ threading.Thread(target=handle_requests_by_batch).start()
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    print(requests_queue.qsize())
+    try:
+        print(requests_queue.qsize())
 
-    if requests_queue.qsize() >= 1:
-        return jsonify({'message': 'Too Many Requests'}), 429
+        if requests_queue.qsize() >= 1:
+            return jsonify({'message': 'Too Many Requests'}), 429
 
-    input_file = request.files['source']
-    file_type = request.form['file_type']
+        input_file = request.files['source']
+        file_type = request.form['file_type']
 
-    if file_type == 'image':
-        if input_file.content_type not in ['image/jpeg', 'image/jpg', 'image/png']:
-            return jsonify({'message': 'Only support jpeg, jpg or png'}), 400
+        if file_type == 'image':
+            if input_file.content_type not in ['image/jpeg', 'image/jpg', 'image/png']:
+                return jsonify({'message': 'Only support jpeg, jpg or png'}), 400
 
-    else :
-        if input_file.content_type not in ['video/mp4']:
-            return jsonify({'message': 'Only support mp4'}), 400
+        else :
+            if input_file.content_type not in ['video/mp4']:
+                return jsonify({'message': 'Only support mp4'}), 400
 
-    f_id = str(uuid.uuid4())
-    f_path = os.path.join(DATA_FOLDER, f_id)
-    os.makedirs(f_path, exist_ok=True)
+        f_id = str(uuid.uuid4())
+        f_path = os.path.join(DATA_FOLDER, f_id)
+        os.makedirs(f_path, exist_ok=True)
 
-    req = {
-        'input': [input_file, file_type, f_path]
-    }
+        req = {
+            'input': [input_file, file_type, f_path]
+        }
 
-    requests_queue.put(req)
+        requests_queue.put(req)
 
-    while 'output' not in req:
-        time.sleep(CHECK_INTERVAL)
+        while 'output' not in req:
+            time.sleep(CHECK_INTERVAL)
 
-    result_path = req['output']
+        if req['output'] == 500:
+            return jsonify({'error': 'Error! Please upload another file'}), 500
 
-    result = send_file(result_path)
+        result_path = req['output']
 
-    shutil.rmtree(f_path)
+        result = send_file(result_path)
 
-    return result
+        shutil.rmtree(f_path)
+
+        return result
+
+    except Exception as e:
+        print(e)
+
+        return jsonify({'message': 'Error! Please upload another file'}), 400
 
 @app.route('/health')
 def health():
