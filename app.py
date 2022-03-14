@@ -113,7 +113,7 @@ def handle_requests_by_batch():
             batch_outputs = []
 
             for request in requests_batch:
-                batch_outputs.append(run(request['input'][0], 'image', request['input'][2]))
+                batch_outputs.append(run(request['input'][0], 'image', request['input'][1]))
 
             for request, output in zip(requests_batch, batch_outputs):
                 request['output'] = output
