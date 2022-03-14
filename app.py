@@ -113,7 +113,7 @@ def handle_requests_by_batch():
             batch_outputs = []
 
             for request in requests_batch:
-                batch_outputs.append(run(request['input'][0], request['input'][1], request['input'][2]))
+                batch_outputs.append(run(request['input'][0], 'image', request['input'][2]))
 
             for request, output in zip(requests_batch, batch_outputs):
                 request['output'] = output
@@ -150,7 +150,7 @@ def predict():
         os.makedirs(f_path, exist_ok=True)
 
         req = {
-            'input': [input_file, file_type, f_path]
+            'input': [input_file, 'image', f_path]
         }
 
         requests_queue.put(req)
