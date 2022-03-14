@@ -51,42 +51,46 @@ def convert_bytes_to_image(img_bytes):
     
     return image
 
-def run(input_file, f_path):
+def run(input_file, file_type, f_path):
     try:
-        f_name = str(uuid.uuid4())
-        img = input_file.read()
-        ## Read Image and convert to PIL (RGB) if RGBA convert appropriately
-        image = convert_bytes_to_image(img)
-        cartoon_image = wb_cartoonizer.infer(image)
+        if file_type == 'image':
+            f_name = str(uuid.uuid4())
 
-        cartoonized_img_name = os.path.join(f_path, f_name + ".jpg")
-        cv2.imwrite(cartoonized_img_name, cv2.cvtColor(cartoon_image, cv2.COLOR_RGB2BGR))
+            img = input_file.read()
 
-        result_path = cartoonized_img_name
+            ## Read Image and convert to PIL (RGB) if RGBA convert appropriately
+            image = convert_bytes_to_image(img)
 
-        return result_path
+            cartoon_image = wb_cartoonizer.infer(image)
 
-        #if file_type == 'video':
-        #    f_name = input_file.filename
+            cartoonized_img_name = os.path.join(f_path, f_name + ".jpg")
+            cv2.imwrite(cartoonized_img_name, cv2.cvtColor(cartoon_image, cv2.COLOR_RGB2BGR))
 
-        #    video = input_file
+            result_path = cartoonized_img_name
 
-        #    original_video_path = os.path.join(f_path, f_name)
-        #    video.save(original_video_path)
+            return result_path
+
+        if file_type == 'video':
+            f_name = input_file.filename
+
+            video = input_file
+
+            original_video_path = os.path.join(f_path, f_name)
+            video.save(original_video_path)
 
             # Slice, Resize and Convert Video to 15fps
-        #    modified_video_path = os.path.join(f_path, f_name.split(".")[0] + "_modified.mp4")
-        #    width_resize = 480
-        #    os.system(
-        #        "ffmpeg -hide_banner -loglevel warning -ss 0 -i '{}' -t 10 -filter:v scale={}:-2 -r 15 -c:a copy '{}'".format(
-        #            os.path.abspath(original_video_path), width_resize, os.path.abspath(modified_video_path)))
+            modified_video_path = os.path.join(f_path, f_name.split(".")[0] + "_modified.mp4")
+            width_resize = 480
+            os.system(
+                "ffmpeg -hide_banner -loglevel warning -ss 0 -i '{}' -t 10 -filter:v scale={}:-2 -r 15 -c:a copy '{}'".format(
+                    os.path.abspath(original_video_path), width_resize, os.path.abspath(modified_video_path)))
 
             # if local then "output_uri" is a file path
-        #    output_uri = wb_cartoonizer.process_video(modified_video_path)
+            output_uri = wb_cartoonizer.process_video(modified_video_path)
 
-        #    result_path = output_uri
+            result_path = output_uri
 
-        #    return result_path
+            return result_path
 
     except Exception as e:
         print(e)
@@ -131,21 +135,22 @@ def predict():
 
         input_file = request.files['source']
         #file_type = request.form['file_type']
+        file_type = 'image'
 
-        #if file_type == 'image':
-        if input_file.content_type not in ['image/jpeg', 'image/jpg', 'image/png']:
-            return jsonify({'message': 'Only support jpeg, jpg or png'}), 400
+        if file_type == 'image':
+            if input_file.content_type not in ['image/jpeg', 'image/jpg', 'image/png']:
+                return jsonify({'message': 'Only support jpeg, jpg or png'}), 400
 
-        #else :
-        #    if input_file.content_type not in ['video/mp4']:
-        #        return jsonify({'message': 'Only support mp4'}), 400
+        else :
+            if input_file.content_type not in ['video/mp4']:
+                return jsonify({'message': 'Only support mp4'}), 400
 
         f_id = str(uuid.uuid4())
         f_path = os.path.join(DATA_FOLDER, f_id)
         os.makedirs(f_path, exist_ok=True)
 
         req = {
-            'input': [input_file, f_path]
+            'input': [input_file, file_type, f_path]
         }
 
         requests_queue.put(req)
